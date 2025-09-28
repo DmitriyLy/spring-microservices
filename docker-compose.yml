@@ -1,0 +1,12 @@
+services:
+  licensing-service:
+    container_name: licensing-service
+    build:
+      context: ./licensing-service
+    ports:
+      - "9191:9191"
+    networks:
+      - internal_network
+
+networks:
+  internal_network:
