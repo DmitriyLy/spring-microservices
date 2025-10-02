@@ -1,12 +1,64 @@
 services:
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "stocks"
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ./postgres/data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      internal_network:
+        aliases:
+            - "postgres"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  configserver:
+    container_name: configserver
+    build:
+      context: ./configserver
+    ports:
+      - "9292:9292"
+      - "9290:9290"
+    environment:
+      ENCRYPT_KEY: "4ee6e829af401be9118e21a3fd06d68d"
+    networks:
+      internal_network:
+        aliases:
+            - "configserver"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:9292/actuator/health/configServer | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
   licensing-service:
     container_name: licensing-service
     build:
       context: ./licensing-service
     ports:
       - "9191:9191"
+    environment:
+      SPRING_ACTIVE_PROFILE: 'docker'
+      SPRING_CONFIG_SERVER_ADDRESS: 'http://configserver:9292/'
     networks:
       - internal_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
 
 networks:
   internal_network:
+    driver: bridge
