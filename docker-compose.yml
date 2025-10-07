@@ -42,12 +42,36 @@ services:
       retries: 10
       start_period: 20s
 
+  eurekaserver:
+    container_name: eurekaserver
+    build:
+      context: ./eurekaserver
+    ports:
+      - "9393:9393"
+      - "9390:9390"
+    environment:
+      SPRING_CONFIG_SERVER_ADDRESS: 'http://configserver:9292/'
+    networks:
+      internal_network:
+        aliases:
+            - "eurekaserver"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:9393/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
   licensing-service:
     container_name: licensing-service
     build:
       context: ./licensing-service
     ports:
       - "9191:9191"
+      - "9190:9190"
     environment:
       SPRING_ACTIVE_PROFILE: 'docker'
       SPRING_CONFIG_SERVER_ADDRESS: 'http://configserver:9292/'
@@ -57,6 +81,28 @@ services:
       postgres:
         condition: service_healthy
       configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+
+  organization-service:
+    container_name: organization-service
+    build:
+      context: ./organization-service
+    ports:
+      - "9494:9494"
+      - "9490:9490"
+    environment:
+      SPRING_ACTIVE_PROFILE: 'docker'
+      SPRING_CONFIG_SERVER_ADDRESS: 'http://configserver:9292/'
+    networks:
+      - internal_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+      eurekaserver:
         condition: service_healthy
 
 networks:

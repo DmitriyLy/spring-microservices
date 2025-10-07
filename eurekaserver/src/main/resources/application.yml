@@ -1,0 +1,9 @@
+spring:
+  config:
+    import: "configserver:${SPRING_CONFIG_SERVER_ADDRESS:http://localhost:9292/}"
+  application:
+    name: eureka-server
+
+
+server:
+  port: 9393

@@ -7,7 +7,7 @@ RUN mvn clean package -DskipTests
 FROM openjdk:25-jdk-slim
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-EXPOSE 9292
-EXPOSE 9290
+EXPOSE 9393
+EXPOSE 9390
 RUN apt update && apt install curl -y
-ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9290", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9390", "-jar", "app.jar"]

@@ -1,0 +1,10 @@
+server:
+  port: 9494
+
+spring:
+  config:
+    import: "configserver:${SPRING_CONFIG_SERVER_ADDRESS:http://localhost:9292/}"
+  application:
+    name: organization-service
+  profiles:
+    active: "${SPRING_ACTIVE_PROFILE:local}"
