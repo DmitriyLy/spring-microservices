@@ -5,6 +5,7 @@ import net.dmly.organization.model.Organization;
 import net.dmly.organization.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,6 +14,10 @@ import java.util.UUID;
 public class OrganizationService {
 
     private final OrganizationRepository repository;
+
+    public List<Organization> findAll(){
+        return (List<Organization>) repository.findAll();
+    }
 
     public Organization findById(String organizationId) {
         Optional<Organization> opt = repository.findById(organizationId);

@@ -7,12 +7,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/organization")
 @RequiredArgsConstructor
 public class OrganizationController {
 
     private final OrganizationService organizationService;
+
+    @GetMapping
+    public ResponseEntity<List<Organization>> findAll(){
+        return new ResponseEntity<>(organizationService.findAll(), HttpStatus.OK);
+    }
 
     @GetMapping("/{organizationId}")
     public ResponseEntity<Organization> getOrganizationById(@PathVariable String organizationId) {

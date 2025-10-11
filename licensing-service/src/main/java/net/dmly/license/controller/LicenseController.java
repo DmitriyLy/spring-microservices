@@ -3,6 +3,7 @@ package net.dmly.license.controller;
 import lombok.RequiredArgsConstructor;
 import net.dmly.license.model.License;
 import net.dmly.license.service.LicenseService;
+import net.dmly.license.service.client.ClientType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class LicenseController {
                                               @PathVariable("licenseId") String licenseId,
                                               @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
 
-        License license = licenseService.getLicense(organizationId, licenseId, locale);
+        License license = licenseService.getLicense(organizationId, licenseId, null, locale);
 
         license.add(
                 linkTo(methodOn(LicenseController.class).getLicense(organizationId, licenseId, locale)).withSelfRel(),
@@ -34,6 +35,14 @@ public class LicenseController {
         );
 
         return ResponseEntity.ok(license);
+    }
+
+    @GetMapping("/{licenseId}/{clientType}")
+    public ResponseEntity<License> getLicenseWithClient(@PathVariable("organizationId") String organizationId,
+                                                        @PathVariable("licenseId") String licenseId,
+                                                        @PathVariable("clientType") ClientType clientType,
+                                                        @RequestHeader(value = "Accept-Language", required = false) Locale locale) {
+        return ResponseEntity.ok(licenseService.getLicense(organizationId, licenseId, clientType, locale));
     }
 
     @PutMapping
