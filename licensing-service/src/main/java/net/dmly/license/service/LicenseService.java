@@ -1,6 +1,9 @@
 package net.dmly.license.service;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import net.dmly.license.config.ConfigPropertiesService;
 import net.dmly.license.model.License;
 import net.dmly.license.model.Organization;
@@ -11,10 +14,12 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LicenseService {
 
     private final LicenseRepository licenseRepository;
@@ -87,7 +92,35 @@ public class LicenseService {
         return String.format(messageSource.getMessage("license.delete.message", null, locale), licenseId);
     }
 
-    public List<License> findAllByOrganizationId(String organizationId, Locale locale) {
+    @CircuitBreaker(name = "LicenseService-findAllByOrganizationId", fallbackMethod = "findAllByOrganizationIdFallback")
+    public List<License> findAllByOrganizationId(String organizationId, Locale locale) throws TimeoutException {
+        randomDelay();
         return licenseRepository.findAllByOrganizationId(organizationId);
+    }
+
+    public List<License> findAllByOrganizationIdFallback(String organizationId, Locale locale, Throwable t){
+        List<License> fallbackList = new ArrayList<>();
+        License license = new License();
+        license.setLicenseId("0000000-00-00000");
+        license.setOrganizationId(organizationId);
+        license.setProductName("Sorry no licensing information currently available");
+        fallbackList.add(license);
+        return fallbackList;
+    }
+
+    private void randomDelay() throws TimeoutException {
+        var random = new Random();
+        if ((random.nextInt(3) + 1) == 3) {
+            sleep();
+        }
+    }
+
+    private void sleep() throws TimeoutException {
+        try {
+            Thread.sleep(200);
+            throw new TimeoutException();
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

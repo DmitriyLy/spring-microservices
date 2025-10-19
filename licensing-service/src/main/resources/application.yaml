@@ -11,4 +11,22 @@ spring:
 
 logging:
   level:
-    root: debug
+    root: info
+
+resilience4j.circuitbreaker:
+  instances:
+    LicenseService-findAllByOrganizationId:
+      register-health-indicator: true
+      sliding-window-type: COUNT_BASED
+      sliding-window-size: 10
+      minimum-number-of-calls: 5
+      permitted-number-of-calls-in-half-open-state: 3
+      wait-duration-in-open-state: 10s
+      failure-rate-threshold: 50
+      slow-call-rate-threshold: 100
+      slow-call-duration-threshold: 2s
+      record-exceptions:
+        - java.io.IOException
+        - java.util.concurrent.TimeoutException
+        - org.springframework.web.client.HttpServerErrorException
+        - org.springframework.web.client.ResourceAccessException
