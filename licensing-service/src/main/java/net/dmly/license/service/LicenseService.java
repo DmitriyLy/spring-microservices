@@ -1,5 +1,6 @@
 package net.dmly.license.service;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -10,6 +11,7 @@ import net.dmly.license.model.Organization;
 import net.dmly.license.repository.LicenseRepository;
 import net.dmly.license.service.client.ClientType;
 import net.dmly.license.service.client.OrganizationClient;
+import net.dmly.license.util.UserContextHolder;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
@@ -93,7 +95,9 @@ public class LicenseService {
     }
 
     @CircuitBreaker(name = "LicenseService-findAllByOrganizationId", fallbackMethod = "findAllByOrganizationIdFallback")
+    @Bulkhead(name = "LicenseService-findAllByOrganizationId-bulkhead")
     public List<License> findAllByOrganizationId(String organizationId, Locale locale) throws TimeoutException {
+        log.debug("getLicensesByOrganization Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
         randomDelay();
         return licenseRepository.findAllByOrganizationId(organizationId);
     }

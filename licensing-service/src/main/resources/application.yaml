@@ -12,6 +12,7 @@ spring:
 logging:
   level:
     root: info
+    net.dmly: debug
 
 resilience4j.circuitbreaker:
   instances:
@@ -30,3 +31,17 @@ resilience4j.circuitbreaker:
         - java.util.concurrent.TimeoutException
         - org.springframework.web.client.HttpServerErrorException
         - org.springframework.web.client.ResourceAccessException
+
+resilience4j.bulkhead:
+    instances:
+      LicenseService-findAllByOrganizationId-bulkhead:
+        max-wait-duration: 2ms
+        max-concurrent-calls: 20
+
+resilience4j.thread-pool-bulkhead:
+  instances:
+    LicenseService-findAllByOrganizationId-bulkhead:
+      max-thread-pool-size: 1
+      core-thread-pool-size: 1
+      queue-capacity: 1
+

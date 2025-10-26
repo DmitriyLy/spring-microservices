@@ -1,9 +1,11 @@
 package net.dmly.license.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.dmly.license.model.License;
 import net.dmly.license.service.LicenseService;
 import net.dmly.license.service.client.ClientType;
+import net.dmly.license.util.UserContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/v1/organization/{organizationId}/license")
 @RequiredArgsConstructor
+@Slf4j
 public class LicenseController {
     private final LicenseService licenseService;
 
@@ -68,6 +71,7 @@ public class LicenseController {
     @GetMapping
     public ResponseEntity<List<License>> findAllLicenseByOrganizationId(@PathVariable("organizationId") String organizationId,
                                                                         @RequestHeader(value = "Accept-Language", required = false) Locale locale) throws TimeoutException {
+        log.debug("LicenseServiceController Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
         return ResponseEntity.ok(licenseService.findAllByOrganizationId(organizationId, locale));
     }
 }
