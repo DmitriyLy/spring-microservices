@@ -8,3 +8,8 @@ spring:
     name: organization-service
   profiles:
     active: "${SPRING_ACTIVE_PROFILE:local}"
+
+logging:
+  level:
+    root: info
+    net.dmly: debug
