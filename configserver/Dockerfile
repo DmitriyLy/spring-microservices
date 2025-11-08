@@ -4,7 +4,7 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-FROM openjdk:25-jdk-slim
+FROM eclipse-temurin:25-jdk
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 9292

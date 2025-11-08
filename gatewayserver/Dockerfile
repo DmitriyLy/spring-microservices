@@ -7,7 +7,7 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:25-jdk
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-EXPOSE 9494
-EXPOSE 9490
-ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9490", "-jar", "app.jar"]
-#ENTRYPOINT ["java", "-jar", "app.jar"]
+EXPOSE 9595
+EXPOSE 9590
+RUN apt update && apt install curl -y
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9590", "-jar", "app.jar"]

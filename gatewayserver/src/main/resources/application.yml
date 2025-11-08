@@ -1,0 +1,20 @@
+server:
+  port: 9595
+
+spring:
+  cloud:
+    gateway:
+      discovery.locator:
+        enabled: true
+        lowerCaseServiceId: true
+  config:
+    import: "configserver:${SPRING_CONFIG_SERVER_ADDRESS:http://localhost:9292/}"
+  application:
+    name: gateway-server
+  profiles:
+    active: "${SPRING_ACTIVE_PROFILE:local}"
+
+management:
+  endpoint:
+    gateway:
+      access: unrestricted
