@@ -12,6 +12,7 @@ services:
     volumes:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./postgres/data.sql:/docker-entrypoint-initdb.d/2-data.sql
+      - ./postgres/data:/var/lib/postgresql/data
     networks:
       internal_network:
         aliases:
@@ -21,6 +22,37 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/stocks
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      internal_network:
+        aliases:
+          - "keycloak"
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "exec 3<>/dev/tcp/localhost/9000; printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\n\r\n' >&3; read -r line <&3; echo $line | grep '200 OK'; r=$?; exec 3>&-; exec 3<&-; exit $r"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   configserver:
     container_name: configserver

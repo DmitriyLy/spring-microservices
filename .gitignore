@@ -33,3 +33,5 @@ build/
 .vscode/
 
 /lib
+
+/postgres/data
