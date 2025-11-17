@@ -35,3 +35,6 @@ build/
 /lib
 
 /postgres/data
+
+.docker-compose.yml.swp
+
